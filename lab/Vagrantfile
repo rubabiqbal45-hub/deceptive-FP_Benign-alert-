@@ -29,6 +29,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "soc-siem", primary: true do |m|
     m.vm.box = "ubuntu/jammy64"
     m.vm.hostname = "soc-siem"
+    # First boot under WHPX (no direct VT-x) is slow; the default 300 s is not
+    # enough and produces a misleading SSH timeout while the guest is fine.
+    m.vm.boot_timeout = 1800
     m.vm.network "private_network", ip: "192.168.56.10"
     m.vm.provider "virtualbox" do |vb|
       vb.name   = "soc-siem"
