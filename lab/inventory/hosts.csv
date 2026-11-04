@@ -1,0 +1,5 @@
+host_id,asset_type,asset_criticality,allowed_roles,aliases
+soc-victim,workstation,2,finance|hr|sales|developer|exec|it_admin|service_account|SOC-VICTIM
+dc-01,domain_controller,5,it_admin|service_account|SOC-DC01
+srv-app01,server,4,it_admin|service_account|SRV-APP01
+fs-01,file_share,3,it_admin|service_account|FS-01

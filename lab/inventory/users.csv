@@ -1,0 +1,9 @@
+user_id,user_role,account
+u001,it_admin,alice
+u002,it_admin,bob
+u003,service_account,svc-backup
+u004,service_account,svc-monitor
+u005,finance,carol
+u006,developer,dave
+u007,hr,erin
+u008,sales,frank

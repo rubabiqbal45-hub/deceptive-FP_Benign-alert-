@@ -1,0 +1,9 @@
+technique,rule_id,tactic,keyword,test_numbers,prereqs,notes
+T1059.001,R-1059-001,Execution,Encoded,,,Encoded / obfuscated PowerShell
+T1218.011,R-1218-011,Defense Evasion,Rundll32,,,Rundll32 proxy execution of a DLL
+T1105,R-1105,Command and Control,Download,,"curl.exe",Ingress tool transfer over HTTP(S)
+T1219,R-1219,Command and Control,Remote Access,,,Remote access / VNC tooling
+T1003.001,R-1003-001,Credential Access,LSASS,,,LSASS memory access (procdump or comsvcs)
+T1053.005,R-1053-005,Persistence,Scheduled Task,,,Scheduled task creation
+T1021.002,R-1021-002,Lateral Movement,PsExec,,"PsExec.exe",Remote service execution
+T1071.001,R-1071-001,Command and Control,Beacon,,,Application-layer beaconing

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sysmon configuration for the mini-SOC lab.
+
+  Design rule: collect what the detection pack actually consumes, and nothing
+  else. Event ID 3 in particular is extremely high volume on a desktop; leaving
+  it unfiltered will produce gigabytes per day and make the capture useless.
+
+  Event IDs collected
+  -------------------
+    1  ProcessCreate     all (detections R-1021-002 / R-1059-001 / R-1218-011
+                             / R-1105 / R-1219 / R-1053-005 need the command line)
+    3  NetworkConnect    ports an attacker or remote-access tool would use
+    7  ImageLoad         unsigned images only (keeps volume sane)
+    10 ProcessAccess     lsass.exe only (R-1003-001)
+    11 FileCreate        Temp / Public / AppData staging paths
+    22 DNSQuery          all (cheap, and useful as context)
+
+  If you change this file, re-run a capture and re-check the per-rule counts
+  printed by lab/bridge/build_dataset.py. A rule that silently drops to zero
+  is almost always a filter problem here, not a modelling result.
+-->
+<Sysmon schemaversion="4.90">
+  <HashAlgorithms>sha256</HashAlgorithms>
+  <CheckRevocation>false</CheckRevocation>
+  <DnsLookup>true</DnsLookup>
+  <ArchiveDirectory>true</ArchiveDirectory>
+
+  <EventFiltering>
+
+    <!-- ------------------------------------------------------ process create -->
+    <RuleGroup name="ProcessCreate" groupRelation="or">
+      <ProcessCreate onmatch="include"/>
+    </RuleGroup>
+
+    <!-- ---------------------------------------------------- network connects -->
+    <!-- Only ports that carry the behaviours under test. Everything else
+         (browser telemetry, Windows Update to 443 on signed binaries) is
+         filtered out by the process exclusion below. -->
+    <RuleGroup name="NetworkConnect" groupRelation="or">
+      <NetworkConnect onmatch="include">
+        <DestinationPort condition="is">445</DestinationPort>
+        <DestinationPort condition="is">3389</DestinationPort>
+        <DestinationPort condition="is">80</DestinationPort>
+        <DestinationPort condition="is">443</DestinationPort>
+        <DestinationPort condition="is">8080</DestinationPort>
+        <DestinationPort condition="is">8443</DestinationPort>
+      </NetworkConnect>
+      <NetworkConnect onmatch="exclude">
+        <Image condition="is">C:\Windows\System32\svchost.exe</Image>
+        <Image condition="is">C:\Windows\System32\lsass.exe</Image>
+        <Image condition="is">C:\Windows\System32\backgroundTaskHost.exe</Image>
+        <DestinationIp condition="is">127.0.0.1</DestinationIp>
+        <DestinationIp condition="is">::1</DestinationIp>
+      </NetworkConnect>
+    </RuleGroup>
+
+    <!-- ------------------------------------------------------ image loads -- -->
+    <RuleGroup name="ImageLoad" groupRelation="or">
+      <ImageLoad onmatch="include">
+        <Signed condition="is">false</Signed>
+      </ImageLoad>
+    </RuleGroup>
+
+    <!-- ---------------------------------------------------- lsass access ---- -->
+    <RuleGroup name="ProcessAccess" groupRelation="or">
+      <ProcessAccess onmatch="include">
+        <TargetImage condition="is">C:\Windows\system32\lsass.exe</TargetImage>
+        <TargetImage condition="is">C:\Windows\System32\lsass.exe</TargetImage>
+      </ProcessAccess>
+    </RuleGroup>
+
+    <!-- ----------------------------------------------------- staging files -- -->
+    <RuleGroup name="FileCreate" groupRelation="or">
+      <FileCreate onmatch="include">
+        <TargetFilename condition="contains any">\Temp\;\Users\Public\;\AppData\Local\Temp\;\ProgramData\lab\</TargetFilename>
+      </FileCreate>
+    </RuleGroup>
+
+    <!-- --------------------------------------------------------- dns queries -->
+    <RuleGroup name="DnsQuery" groupRelation="or">
+      <DnsQuery onmatch="include"/>
+    </RuleGroup>
+
+  </EventFiltering>
+</Sysmon>

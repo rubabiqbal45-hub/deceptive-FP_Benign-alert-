@@ -1,0 +1,486 @@
+{
+  "config": {
+    "seed": 42,
+    "n_alerts": 48000,
+    "start_date": "2026-01-05",
+    "weeks": 12,
+    "attack_rate": 0.03,
+    "train_weeks": [
+      1,
+      6
+    ],
+    "calib_weeks": [
+      7,
+      8
+    ],
+    "test_weeks": [
+      9,
+      12
+    ],
+    "drift_week": 10,
+    "alpha_suppress": 0.02,
+    "alpha_safety": 0.75,
+    "alpha_delta": 0.05,
+    "beta_recall": 0.02,
+    "escalation_fraction": 0.3,
+    "target_escalation_precision": 0.85,
+    "min_suppress": 100,
+    "cluster_k": 36,
+    "cluster_min_size": 20,
+    "n_analysts": 8,
+    "analyst_alerts_per_hour": 10.0,
+    "analyst_hourly_cost": 45.0,
+    "sla_minutes": 15.0,
+    "workday_hours": 8.0,
+    "breach_cost": 1200000.0,
+    "p_exploit_given_miss": 0.05,
+    "adversarial_fraction": 0.3,
+    "drift_shift": 0.35,
+    "outdir": "results"
+  },
+  "source": "synth",
+  "split": {
+    "mode": "week",
+    "weeks_observed": 12,
+    "note": "configured week ranges"
+  },
+  "dataset": {
+    "alerts": 48000,
+    "days": 81,
+    "weeks_observed": 12,
+    "attack_rate": 0.0289375,
+    "deceptive_fp_rate": 0.544375,
+    "unique_rules": 10,
+    "unique_hosts": 60,
+    "train": 23784,
+    "calib": 7849,
+    "test": 16367,
+    "train_attacks": 685,
+    "calib_attacks": 243,
+    "test_attacks": 461,
+    "test_deceptive_attacks": 322
+  },
+  "model_comparison": [
+    {
+      "model": "B2 logistic regression",
+      "roc_auc": 0.9872859339290785,
+      "pr_auc": 0.9087609754756597,
+      "ece": 0.06048297499874537
+    },
+    {
+      "model": "B3 random forest",
+      "roc_auc": 0.9901893799608492,
+      "pr_auc": 0.908273259706959,
+      "ece": 0.023459305225341252
+    },
+    {
+      "model": "M1 native GBM triage",
+      "roc_auc": 0.9859310379062677,
+      "pr_auc": 0.9036014354846177,
+      "ece": 0.006496702996982856
+    },
+    {
+      "model": "B1 rule base-rate",
+      "roc_auc": 0.7348425524904585,
+      "pr_auc": 0.05288598084058333,
+      "ece": 0.0035498425357236765
+    },
+    {
+      "model": "B0 rule severity",
+      "roc_auc": 0.6993422992401399,
+      "pr_auc": 0.04611119761683597,
+      "ece": 0.3698702674079957
+    }
+  ],
+  "suppression": {
+    "alpha": 0.02,
+    "alpha_effective": 0.015,
+    "alpha_safety": 0.75,
+    "beta_recall": 0.02,
+    "beta_effective": 0.015,
+    "modes": [
+      {
+        "mode": "A: alpha among suppressed",
+        "cal_bound": 0.014815443140446968,
+        "threshold": 0.851792820430548,
+        "suppression_rate": 0.9798374778517749,
+        "suppressed": 16037,
+        "fn_in_suppressed": 138,
+        "realised_fn_rate": 0.008605100704620564,
+        "missed_share_of_attacks": 0.2993492407809111,
+        "recall": 0.7006507592190889,
+        "feasible": true
+      },
+      {
+        "mode": "B: beta of all attacks",
+        "cal_bound": 0.017167304833652395,
+        "threshold": 0.004537988770466907,
+        "suppression_rate": 0.5216594366713508,
+        "suppressed": 8538,
+        "fn_in_suppressed": 3,
+        "realised_fn_rate": 0.00035137034434293746,
+        "missed_share_of_attacks": 0.006507592190889371,
+        "recall": 0.9934924078091106,
+        "feasible": true
+      }
+    ],
+    "primary_mode": "B",
+    "calibrated_bound": 0.017167304833652395,
+    "threshold": 0.004538592628818661,
+    "suppressed_alerts": 8538,
+    "suppression_rate": 0.5216594366713508,
+    "realised_fn_rate": 0.00035137034434293746,
+    "fn_attacks": 3,
+    "escalation_threshold": 0.015339682871428773,
+    "escalation_fraction": 0.3,
+    "action_mix": {
+      "suppress": 8538,
+      "rank": 5448,
+      "escalate": 2381
+    }
+  },
+  "cluster": {
+    "variants": {
+      "signature (Bonferroni)": {
+        "mode": "signature",
+        "clusters": 13,
+        "clusters_suppressed": 6,
+        "coverage": 0.5946722062687114,
+        "fn_in_suppressed": 0,
+        "fn_rate": 0.0,
+        "refused_despite_deceptive_fps": 3
+      },
+      "signature (marginal)": {
+        "mode": "signature",
+        "clusters": 13,
+        "clusters_suppressed": 7,
+        "coverage": 0.6644467526119631,
+        "fn_in_suppressed": 0,
+        "fn_rate": 0.0,
+        "refused_despite_deceptive_fps": 2
+      },
+      "context (marginal)": {
+        "mode": "context",
+        "clusters": 36,
+        "clusters_suppressed": 2,
+        "coverage": 0.0662308303293212,
+        "fn_in_suppressed": 9,
+        "fn_rate": 0.008302583025830259,
+        "refused_despite_deceptive_fps": 34
+      }
+    },
+    "suppressed_clusters": 6,
+    "coverage": 0.5946722062687114,
+    "fn_in_suppressed": 0,
+    "fn_rate": 0.0,
+    "refused_despite_deceptive_fps": 3
+  },
+  "budget_curve": [
+    {
+      "fn_budget": 0.005,
+      "alert_reduction": 0.4917822447607992,
+      "kept": 8318,
+      "missed": 2,
+      "fn_realised": 0.004338394793926247
+    },
+    {
+      "fn_budget": 0.01,
+      "alert_reduction": 0.568888617339769,
+      "kept": 7056,
+      "missed": 4,
+      "fn_realised": 0.008676789587852495
+    },
+    {
+      "fn_budget": 0.02,
+      "alert_reduction": 0.7798008187205964,
+      "kept": 3604,
+      "missed": 9,
+      "fn_realised": 0.019522776572668113
+    },
+    {
+      "fn_budget": 0.05,
+      "alert_reduction": 0.8918555630231564,
+      "kept": 1770,
+      "missed": 23,
+      "fn_realised": 0.049891540130151846
+    },
+    {
+      "fn_budget": 0.1,
+      "alert_reduction": 0.9579030976965845,
+      "kept": 689,
+      "missed": 46,
+      "fn_realised": 0.09978308026030369
+    }
+  ],
+  "precision_at_capacity": {
+    "reviewed": 818,
+    "true_positives": 425,
+    "precision": 0.519559902200489,
+    "recall": 0.9219088937093276
+  },
+  "deceptive_subset": {
+    "subset": "kept",
+    "n_attacks": 322,
+    "kept_deceptive": 322,
+    "recall_deceptive": 1.0,
+    "recall_overall": 0.9934924078091106
+  },
+  "queue": {
+    "baseline": {
+      "arrivals": 16367,
+      "served": 15515,
+      "mean_wait": 21965.82053952511,
+      "p95_wait": 41205.40452923301,
+      "max_wait": 48861.124148658884,
+      "sla_breach_rate": 0.9634630659253376,
+      "unserved": 852,
+      "unserved_frac": 0.05205596627359932,
+      "utilisation": 0.9801310426640395
+    },
+    "triaged": {
+      "arrivals": 7829,
+      "served": 7829,
+      "mean_wait": 287.7876793972512,
+      "p95_wait": 1108.4706849056179,
+      "max_wait": 2548.150767103769,
+      "sla_breach_rate": 0.091582577596117,
+      "unserved": 0,
+      "unserved_frac": 0.0,
+      "utilisation": 0.48016228650859916
+    },
+    "business_hours": 208.13046296296295,
+    "analysts_needed_for_sla": {
+      "baseline": 19,
+      "triaged": 9
+    }
+  },
+  "cost": {
+    "threshold": 0.003905593379374545,
+    "recall": 1.0,
+    "kept_per_day": 341.6923076923077,
+    "keep_fraction": 0.542799535651005,
+    "total_cost_annual": 561229.6153846154,
+    "review_cost_annual": 561229.6153846154,
+    "miss_cost_annual": 0.0,
+    "review_all_cost_annual": 1033953.75,
+    "savings_annual": 472724.1346153846,
+    "savings_pct": 45.720046434899494
+  },
+  "cost_sensitivity": [
+    {
+      "p_exploit_given_miss": 0.0001,
+      "implicit_cost_per_miss": 120.0,
+      "optimal_keep_fraction": 0.051811572065742044,
+      "optimal_recall": 0.9262472885032538,
+      "savings_vs_review_all": 923106.0576923077,
+      "suppression_is_optimal": true
+    },
+    {
+      "p_exploit_given_miss": 0.001,
+      "implicit_cost_per_miss": 1200.0,
+      "optimal_keep_fraction": 0.22111565955886844,
+      "optimal_recall": 0.9804772234273319,
+      "savings_vs_review_all": 653715.0,
+      "suppression_is_optimal": true
+    },
+    {
+      "p_exploit_given_miss": 0.01,
+      "implicit_cost_per_miss": 12000.0,
+      "optimal_keep_fraction": 0.542799535651005,
+      "optimal_recall": 1.0,
+      "savings_vs_review_all": 472724.1346153846,
+      "suppression_is_optimal": true
+    },
+    {
+      "p_exploit_given_miss": 0.05,
+      "implicit_cost_per_miss": 60000.0,
+      "optimal_keep_fraction": 0.542799535651005,
+      "optimal_recall": 1.0,
+      "savings_vs_review_all": 472724.1346153846,
+      "suppression_is_optimal": true
+    }
+  ],
+  "robustness": {
+    "available": true,
+    "roc_auc_clean": 0.9859310379062677,
+    "roc_auc_adversarial": 0.9783166177213035,
+    "adversarial": [
+      {
+        "group": "ordinary attacks",
+        "n": 323,
+        "recall": 0.8668730650154799
+      },
+      {
+        "group": "adversarial attacks",
+        "n": 138,
+        "recall": 0.7463768115942029
+      }
+    ],
+    "recalibration": {
+      "stale": {
+        "coverage": 0.9828313068980266,
+        "fn_rate": 0.011252020390401591
+      },
+      "recalibrated": {
+        "coverage": 0.9897965418219589,
+        "fn_rate": 0.01814814814814815
+      }
+    }
+  },
+  "top_features": [
+    {
+      "feature": "rule_id",
+      "importance": 0.04023918213595952,
+      "std": 0.0022479155783303264
+    },
+    {
+      "feature": "user_role",
+      "importance": 0.02291423919809741,
+      "std": 0.0018133855781492935
+    },
+    {
+      "feature": "hist_user_rule",
+      "importance": 0.008945188424765726,
+      "std": 0.0006336598836998245
+    },
+    {
+      "feature": "asset_type",
+      "importance": 0.0011879299612137073,
+      "std": 4.899943490636004e-05
+    },
+    {
+      "feature": "role_asset_mismatch",
+      "importance": 0.0001424558267226317,
+      "std": 1.840978974702914e-05
+    },
+    {
+      "feature": "event_count",
+      "importance": 0.00012330210212125882,
+      "std": 3.832926526795004e-05
+    },
+    {
+      "feature": "dst_reputation",
+      "importance": 3.810793123810718e-05,
+      "std": 2.0995888862227218e-05
+    },
+    {
+      "feature": "host_novelty",
+      "importance": 2.4740227610120513e-05,
+      "std": 1.809354048420805e-05
+    },
+    {
+      "feature": "cmdline_distance",
+      "importance": 2.4540709645504143e-05,
+      "std": 3.293920142295647e-05
+    },
+    {
+      "feature": "hist_user",
+      "importance": 1.875468867214014e-05,
+      "std": 2.6192385252413923e-05
+    }
+  ],
+  "examples": [
+    {
+      "kind": "deceptive false positive (highest-scoring)",
+      "alert_id": "AL-039128",
+      "rule": "Remote Service Execution via PsExec",
+      "technique": "T1021.002",
+      "score": 0.8555290422054382,
+      "ground_truth": "benign",
+      "explanation": [
+        {
+          "feature": "role_asset_mismatch",
+          "value": 1.0,
+          "delta": 0.7422458347777614,
+          "direction": "toward attack"
+        },
+        {
+          "feature": "lineage_depth",
+          "value": 3.0,
+          "delta": 0.2559434547682006,
+          "direction": "toward attack"
+        },
+        {
+          "feature": "event_count",
+          "value": 7.0,
+          "delta": 0.2282641206514533,
+          "direction": "toward attack"
+        },
+        {
+          "feature": "hist_user_rule",
+          "value": 873.0,
+          "delta": 0.09631469400937631,
+          "direction": "toward attack"
+        }
+      ]
+    },
+    {
+      "kind": "deceptive attack (lowest-scoring)",
+      "alert_id": "AL-033233",
+      "rule": "Remote Service Execution via PsExec",
+      "technique": "T1021.002",
+      "score": 0.00983341454427008,
+      "ground_truth": "attack",
+      "explanation": [
+        {
+          "feature": "hist_user_rule",
+          "value": 766.0,
+          "delta": 0.005436943009044533,
+          "direction": "toward attack"
+        },
+        {
+          "feature": "asset_type",
+          "value": "server",
+          "delta": -0.005259719591604277,
+          "direction": "toward benign"
+        },
+        {
+          "feature": "hist_user",
+          "value": 1620.0,
+          "delta": -0.0035810122028631687,
+          "direction": "toward benign"
+        },
+        {
+          "feature": "lineage_depth",
+          "value": 1.0,
+          "delta": -0.002068288700846752,
+          "direction": "toward benign"
+        }
+      ]
+    },
+    {
+      "kind": "ordinary attack (median score)",
+      "alert_id": "AL-034120",
+      "rule": "Scheduled Task Creation",
+      "technique": "T1053.005",
+      "score": 0.6872553565823899,
+      "ground_truth": "attack",
+      "explanation": [
+        {
+          "feature": "host_novelty",
+          "value": 0.8474211152514424,
+          "delta": 0.3063618848875616,
+          "direction": "toward attack"
+        },
+        {
+          "feature": "cmdline_distance",
+          "value": 1.0,
+          "delta": 0.2988651077866138,
+          "direction": "toward attack"
+        },
+        {
+          "feature": "signed_ratio",
+          "value": 0.49780062225190735,
+          "delta": 0.27590023719819734,
+          "direction": "toward attack"
+        },
+        {
+          "feature": "rule_id",
+          "value": "R-1053-005",
+          "delta": 0.1685016137384201,
+          "direction": "toward attack"
+        }
+      ]
+    }
+  ]
+}

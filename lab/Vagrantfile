@@ -1,0 +1,101 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+#
+# Mini-SOC lab: two Windows hosts, one Linux SIEM, isolated host-only network.
+#
+#   vagrant up soc-siem soc-victim     # phase 1 (~40-60 min first boot)
+#   vagrant up dc-01                   # phase 2, optional AD
+#
+# Requirements: Vagrant >= 2.3, VirtualBox 7.x (or the Hyper-V provider).
+# Disk: ~40 GB. RAM: 12 GB free (6 + 4 + 2).
+#
+# The Windows boxes are ~5 GB downloads. Do not run this on a metered link.
+
+# Memory defaults match the documented topology. Override per host, e.g.
+#   $env:LAB_SIEM_MEM = "4096"; $env:LAB_VICTIM_MEM = "3072"; vagrant up
+# when the host has less than the recommended 12 GB free.
+SIEM_MEM   = (ENV["LAB_SIEM_MEM"]   || 6144).to_i
+VICTIM_MEM = (ENV["LAB_VICTIM_MEM"] || 4096).to_i
+DC_MEM     = (ENV["LAB_DC_MEM"]     || 2048).to_i
+
+Vagrant.configure("2") do |config|
+  config.vm.box_check_update = false
+  # Sync the repository root, not this directory. Every provisioner and
+  # guest-side helper refers to /vagrant/lab/... (and C:\vagrant\lab\...),
+  # so mounting only lab/ here breaks them with a doubled path.
+  config.vm.synced_folder "..", "/vagrant", disabled: false
+
+  # ---------------------------------------------------------------- SIEM
+  config.vm.define "soc-siem", primary: true do |m|
+    m.vm.box = "ubuntu/jammy64"
+    m.vm.hostname = "soc-siem"
+    m.vm.network "private_network", ip: "192.168.56.10"
+    m.vm.provider "virtualbox" do |vb|
+      vb.name   = "soc-siem"
+      vb.memory = SIEM_MEM
+      vb.cpus   = 2
+    end
+    m.vm.provider "hyperv" do |hv|
+      hv.memory = SIEM_MEM
+      hv.cpus   = 2
+      hv.vmname = "soc-siem"
+    end
+    m.vm.provision "shell", path: "provision/siem.sh",
+                    args: ["192.168.56.0/24"]
+  end
+
+  # -------------------------------------------------------------- victim
+  config.vm.define "soc-victim" do |m|
+    m.vm.box = "StefanScherer/windows_2022"
+    m.vm.hostname = "soc-victim"
+    m.vm.communicator = "winrm"
+    m.winrm.username = "vagrant"
+    m.winrm.password = "vagrant"
+    m.winrm.timeout = 1800
+    m.vm.boot_timeout = 1200
+    m.vm.network "private_network", ip: "192.168.56.12"
+    m.vm.provider "virtualbox" do |vb|
+      vb.name   = "soc-victim"
+      vb.memory = VICTIM_MEM
+      vb.cpus   = 2
+      vb.gui    = false
+    end
+    m.vm.provider "hyperv" do |hv|
+      hv.memory = VICTIM_MEM
+      hv.cpus   = 2
+      hv.vmname = "soc-victim"
+    end
+    m.vm.provision "shell",
+                    path: "provision/windows-common.ps1",
+                    args: ["192.168.56.10", "soc-victim"],
+                    privileged: true
+  end
+
+  # ------------------------------------------------------- domain controller
+  # Optional but recommended for phase 2: it provides realistic user accounts
+  # and makes lateral movement (PsExec to DC-01) meaningful.
+  config.vm.define "dc-01", autostart: false do |m|
+    m.vm.box = "StefanScherer/windows_2022"
+    m.vm.hostname = "dc-01"
+    m.vm.communicator = "winrm"
+    m.winrm.username = "vagrant"
+    m.winrm.password = "vagrant"
+    m.winrm.timeout = 1800
+    m.vm.boot_timeout = 1200
+    m.vm.network "private_network", ip: "192.168.56.11"
+    m.vm.provider "virtualbox" do |vb|
+      vb.name   = "dc-01"
+      vb.memory = DC_MEM
+      vb.cpus   = 2
+      vb.gui    = false
+    end
+    m.vm.provision "shell",
+                    path: "provision/windows-common.ps1",
+                    args: ["192.168.56.10", "dc-01"],
+                    privileged: true
+    m.vm.provision "shell",
+                    path: "provision/dc.ps1",
+                    args: ["CORP", "corp.local"],
+                    privileged: true
+  end
+end

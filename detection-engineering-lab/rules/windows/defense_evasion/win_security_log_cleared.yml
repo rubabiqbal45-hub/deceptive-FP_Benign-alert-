@@ -1,0 +1,25 @@
+title: Windows Security Event Log Cleared
+id: 6a2c8f41-93d7-4b2e-8f5a-0c7d1e9b4a63
+status: experimental
+description: |
+  An audit log was cleared (event 1102). Attackers clear logs to destroy
+  evidence, but backup software and some installers also do it, so this rule
+  needs an environment-specific allow-list before it can be trusted on shift.
+references:
+  - https://attack.mitre.org/techniques/T1070/001/
+author: detection-engineering-lab
+date: 2026/11/03
+tags:
+  - attack.defense_evasion
+  - attack.t1070.001
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 1102
+  condition: selection
+falsepositives:
+  - Backup or log-rotation tooling with administrative rights
+  - Change-management scripts that clear logs before handover
+level: high

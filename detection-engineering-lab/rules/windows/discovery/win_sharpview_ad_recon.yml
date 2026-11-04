@@ -1,0 +1,31 @@
+title: SharpView Active Directory Reconnaissance
+id: 3b0f7c62-1d4e-4a98-9c11-8f2a6e5d7b10
+status: experimental
+description: |
+  Detects SharpView, a .NET port of PowerView used for Active Directory
+  enumeration (ACL review, user and trust discovery). SharpView is a
+  post-exploitation tool: legitimate use is rare outside red-team activity.
+references:
+  - https://github.com/tevora-threat/SharpView
+author: detection-engineering-lab
+date: 2026/11/03
+tags:
+  - attack.discovery
+  - attack.t1087.002
+  - attack.t1069.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: '\SharpView.exe'
+  selection_cmdline:
+    CommandLine|contains:
+      - 'Get-ObjectAcl'
+      - 'Get-NetUser'
+      - 'Get-DomainTrust'
+      - 'Get-NetComputer'
+  condition: selection_image or selection_cmdline
+falsepositives:
+  - Red-team or penetration-test activity on a sanctioned engagement
+level: high

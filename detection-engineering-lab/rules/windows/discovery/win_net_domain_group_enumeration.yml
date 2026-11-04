@@ -1,0 +1,32 @@
+title: Domain Group Enumeration via Net.exe
+id: b71d5e04-2f8a-4c63-9d1b-5e0a7c3f8b29
+status: experimental
+description: |
+  Enumerates domain groups with net.exe. This is one of the most common benign
+  administrative actions in a Windows estate and also one of the most common
+  first steps after initial access, which makes it a useful example of a rule
+  whose value depends entirely on how it is filtered.
+references:
+  - https://attack.mitre.org/techniques/T1069/002/
+author: detection-engineering-lab
+date: 2026/11/03
+tags:
+  - attack.discovery
+  - attack.t1069.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_action:
+    CommandLine|contains:
+      - 'net group'
+      - 'net localgroup'
+  selection_target:
+    CommandLine|contains:
+      - 'domain admins'
+      - '/domain'
+  condition: selection_action and selection_target
+falsepositives:
+  - Help-desk and sysadmin scripts that audit group membership
+  - Monitoring agents that enumerate groups on a schedule
+level: low

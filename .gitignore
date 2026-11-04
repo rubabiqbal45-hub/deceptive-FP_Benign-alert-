@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+results_test/
+results_quick/
+.ipynb_checkpoints/
+
+# Lab capture artifacts. The lab is reproducible from Vagrant + the scripts;
+# raw telemetry and derived datasets are large and machine-specific.
+lab/out/
+lab/.vagrant/
+results_lab/
+results_fixture/
+*.log
+
